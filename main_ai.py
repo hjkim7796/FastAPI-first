@@ -5,10 +5,10 @@ from typing import List, Annotated, Dict
 from contextlib import asynccontextmanager
 from pydantic import EmailStr, BaseModel
 from datetime import timedelta
-from mcp_server import ai_query, ai_stream_generator, ai_websocket_generator
+from ai_agent import ai_query, ai_stream_generator, ai_websocket_generator
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-
+import uvicorn
 import asyncio
 
 
@@ -106,3 +106,15 @@ async def query_stream(query: str):
         ai_stream_generator(query),
         media_type="text/event-stream"
     ) 
+
+# ==================== MAIN ====================
+if __name__ == "__main__":
+    print("Starting FastAPI Server...")
+    print("API docs: http://localhost:8000/docs")
+    
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_level="info"
+    )
