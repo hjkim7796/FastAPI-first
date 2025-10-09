@@ -25,7 +25,7 @@ app = FastAPI(
     debug=True
 )
 # static 파일 서빙 설정
-app.mount("/static", StaticFiles(directory="static"), name="static")
+#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # templates 폴더 설정
 templates = Jinja2Templates(directory="templates")
