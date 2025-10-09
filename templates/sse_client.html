@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        #result { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px solid #ccc;
+            min-height: 50px;
+            background: #f9f9f9;
+        }
+        input { width: 400px; padding: 8px; }
+        button { padding: 8px 20px; margin-left: 10px; }
+        .status { 
+            margin-top: 10px;
+            color: #666; 
+            font-style: italic; 
+        }
+        .processing { color: #ff9800; }
+        .completed { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    
+    <div>
+        <input type="text" value="20과 35을 더한 다음, 그 결과에 6를 곱해주세요" id="queryInput" placeholder="질문을 입력하세요">
+        <button onclick="submitQuery()">전송</button>
+        <button onclick="cancelQuery()" style="background: #f44336; color: white;">취소</button>
+    </div>
+    
+    <div id="status" class="status"></div>
+    <div id="result"></div>
+
+    <script>
+        let currentEventSource = null;
+
+        function submitQuery() {
+            const query = document.getElementById('queryInput').value;
+            if (!query) {
+                alert('질문을 입력하세요');
+                return;
+            }
+            
+            // 기존 연결이 있으면 종료
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+            
+            // 초기화
+            document.getElementById('status').textContent = '연결 중...';
+            document.getElementById('status').className = 'status processing';
+            document.getElementById('result').textContent = '';
+            
+            // SSE 연결
+            const url = `http://localhost:8000/api/mcp/query-sse?query=${encodeURIComponent(query)}`;
+            currentEventSource = new EventSource(url);
+            
+            currentEventSource.onopen = () => {
+                console.log('SSE 연결됨');
+            };
+            
+            currentEventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('메시지 받음:', data);
+                
+                if (data.status === 'processing') {
+                    //document.getElementById('status').textContent = `처리 중: ${data.query}`;
+                    document.getElementById('status').innerHTML = `처리 중: ${data.result.replace(/\n/g, "<br />")}`;
+                    document.getElementById('status').className = 'status processing';
+                } else if (data.status === 'completed') {
+                    document.getElementById('status').textContent = '완료!';
+                    document.getElementById('status').className = 'status completed';
+                    document.getElementById('result').innerHTML = data.result.replace(/\n/g, "<br />");
+                    
+                    // 연결 종료
+                    currentEventSource.close();
+                    currentEventSource = null;
+                }
+            };
+            
+            currentEventSource.onerror = (error) => {
+                console.error('SSE 에러:', error);
+                document.getElementById('status').textContent = '에러 발생';
+                document.getElementById('status').className = 'status error';
+                
+                currentEventSource.close();
+                currentEventSource = null;
+            };
+        }
+        
+        function cancelQuery() {
+            if (currentEventSource) {
+                currentEventSource.close();
+                currentEventSource = null;
+                document.getElementById('status').textContent = '취소됨';
+                document.getElementById('status').className = 'status';
+            }
+        }
+        
+        // 엔터키로 전송
+        document.getElementById('queryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitQuery();
+            }
+        });
+        
+        // 페이지 종료 시 연결 정리
+        window.addEventListener('beforeunload', () => {
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+        });
+    </script>
+</body>
+</html>
