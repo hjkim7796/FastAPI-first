@@ -7,4 +7,5 @@ main.py
 models.py
 security.py
 schemas.py
+requirements.txt
 __pycache__
