@@ -30,14 +30,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # templates 폴더 설정
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/sse", response_class=HTMLResponse)
+@app.get("/sse", response_class=HTMLResponse, include_in_schema=False)
 async def home(request: Request):
     return templates.TemplateResponse("sse_client.html", {
         "request": request,
         "title": "AI Query Client (SSE)",
     })
 
-@app.get("/web-socket", response_class=HTMLResponse)
+@app.get("/web-socket", response_class=HTMLResponse, include_in_schema=False)
 async def home(request: Request):
     return templates.TemplateResponse("websocket_client.html", {
         "request": request,
@@ -91,7 +91,7 @@ async def query_websocket(request: QueryRequest, background_tasks: BackgroundTas
         "query": request.query
     }
         
-@app.post("/api/mcp/query-websocket2")
+@app.post("/api/mcp/query-websocket2", include_in_schema=False)
 async def query_websocket2(query: str, client_id: str, background_tasks: BackgroundTasks):
     print(f"query_websocket called with query: {query}, client_id: {client_id}")
     """쿼리를 받아서 백그라운드에서 처리"""
