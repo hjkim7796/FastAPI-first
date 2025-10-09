@@ -8,4 +8,5 @@ models.py
 security.py
 schemas.py
 requirements.txt
+.vscode/
 __pycache__
