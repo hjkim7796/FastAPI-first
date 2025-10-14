@@ -96,7 +96,7 @@ def get_all_users(
 
 # 특정 사용자 조회
 @app.get("/api/users/{user_id}", response_model=UserResponse, tags=["Users"])
-def get_user(user_id: int, db: DbDependency):
+def get_user_by(user_id: int, db: DbDependency):
     """
     ID로 특정 사용자를 조회합니다.
     사용자 ID는 경로 매개변수로 전달됩니다.
