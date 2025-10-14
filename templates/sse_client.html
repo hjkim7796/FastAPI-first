@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>{{ title }}</title>
+    <link rel="shortcut icon" href="/static/favicon.ico">
     <style>
         body { font-family: Arial; padding: 20px; }
         #result { 
@@ -21,6 +22,7 @@
         .processing { color: #ff9800; }
         .completed { color: green; }
         .error { color: red; }
+        .log { margin-top: 20px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; max-height: 800px; overflow-y: auto; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -34,9 +36,21 @@
     
     <div id="status" class="status"></div>
     <div id="result"></div>
+    <div class="log">
+        <strong>로그:</strong>
+        <div id="logContent"></div>
+    </div>
 
     <script>
         let currentEventSource = null;
+        let user_id = "lucas-123"
+
+        function addLog(message) {
+            const logDiv = document.getElementById('logContent');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
 
         function submitQuery() {
             const query = document.getElementById('queryInput').value;
@@ -56,17 +70,17 @@
             document.getElementById('result').textContent = '';
             
             // SSE 연결
-            const url = `http://localhost:8000/api/mcp/query-sse?query=${encodeURIComponent(query)}`;
+            const url = `http://localhost:8000/api/mcp/query-sse?query=${encodeURIComponent(query)}&user_id=${user_id}`;
             currentEventSource = new EventSource(url);
             
+            addLog(`SSE 연결 시도... (USER ID: ${user_id})`);
             currentEventSource.onopen = () => {
-                console.log('SSE 연결됨');
+                addLog('SSE 연결됨');
             };
             
             currentEventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                console.log('메시지 받음:', data);
-                
+                addLog('메시지 수신: ' + JSON.stringify(data));
                 if (data.status === 'processing') {
                     //document.getElementById('status').textContent = `처리 중: ${data.query}`;
                     document.getElementById('status').innerHTML = `처리 중: ${data.result.replace(/\n/g, "<br />")}`;
@@ -84,6 +98,7 @@
             
             currentEventSource.onerror = (error) => {
                 console.error('SSE 에러:', error);
+                addLog('전송 실패: ' + error.message);
                 document.getElementById('status').textContent = '에러 발생';
                 document.getElementById('status').className = 'status error';
                 
