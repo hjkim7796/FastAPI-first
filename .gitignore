@@ -1,12 +1,5 @@
-main copy.py
-crud.py
-database.py
-dependencies.py
-main_no_jwt.py
-main.py
-models.py
-security.py
-schemas.py
-requirements.txt
+samples/
+.backup
+.venv/
 .vscode/
 __pycache__
