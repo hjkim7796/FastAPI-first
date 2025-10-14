@@ -70,7 +70,8 @@
             document.getElementById('result').textContent = '';
             
             // SSE 연결
-            const url = `http://localhost:8000/api/mcp/query-sse?query=${encodeURIComponent(query)}&user_id=${user_id}`;
+            // const url = `http://localhost:8000/api/mcp/query-sse?query=${encodeURIComponent(query)}&user_id=${user_id}`;
+            const url = `api/mcp/query-sse?query=${encodeURIComponent(query)}&user_id=${user_id}`;
             currentEventSource = new EventSource(url);
             
             addLog(`SSE 연결 시도... (USER ID: ${user_id})`);
